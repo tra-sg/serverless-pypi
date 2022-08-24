@@ -13,7 +13,7 @@ Python packaging is fantastic; however, challenges arise when you need to use st
 4. Manages users for both download and upload roles
 
 ## Performance
-`serverless-pypi` is *fast* for `pip install` requests, as these requests are eventually redirected to AWS S3 presigned URLs. This is particularly true when you are using `serverless-pypi` with AWS itself.
+`serverless-pypi` is *fast* for `pip install` requests, as these requests are eventually redirected to AWS S3 presigned URLs. This is particularly true when you are accessing `serverless-pypi` within AWS itself.
 
 Uploads using `twine` are still quite fast, but since these must be processed directly by the Lambda function will be slower than downloads. New packages uploaded will be made availabe within a few seconds. New files uploaded to an existing package are available immediately.
 
