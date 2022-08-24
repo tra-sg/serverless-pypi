@@ -369,7 +369,7 @@ USERS_DATABASE: dict[str, PyPIUser] = dict()
 ##############################
 
 
-def create_index(context: LambdaContext) -> None:
+def create_index(context: LambdaContext = None) -> None:
     getLogger().info("Indexing")
     getLogger().info(f"Retrieving remote index from {MIRROR_INDEX_URL}")
     project_list = PyPIProjectList.parse_response(
@@ -436,7 +436,7 @@ def create_index(context: LambdaContext) -> None:
                 ),
             ]
         )
-    getLogger().info("Index created, restarting")
+    getLogger().info("Index created")
     restart_lambda_function(context)
 
 
@@ -447,10 +447,8 @@ def lambda_client() -> LambdaClient:
     return LAMBDA_CLIENT
 
 
-def load_database(context: LambdaContext, reentry: bool = False) -> None:
+def load_database(reentry: bool = False) -> None:
     global DATABASE
-    if DATABASE:
-        return
     try:
         DATABASE = json.load(
             boto3.resource(
@@ -464,8 +462,8 @@ def load_database(context: LambdaContext, reentry: bool = False) -> None:
     except ClientError as ce:
         if not aws_error_matches(ce, "NoSuchKey") or reentry:
             raise ce
-        create_index(context)
-        load_database(context, reentry=True)
+        create_index()
+        load_database(reentry=True)
 
 
 def normalize_name(name: str) -> str:
@@ -473,7 +471,7 @@ def normalize_name(name: str) -> str:
 
 
 def restart_lambda_function(context: LambdaContext) -> None:
-    if "AWS_LAMBDA_FUNCTION_NAME" in environ:
+    if context:
 
         @backoff.on_exception(
             backoff.expo,
@@ -486,9 +484,10 @@ def restart_lambda_function(context: LambdaContext) -> None:
         def _restart_lambda_function() -> None:
             lambda_client().update_function_configuration(
                 Description=f"Reindexed - {datetime.now(timezone.utc).isoformat()}",
-                FunctionName=environ["AWS_LAMBDA_FUNCTION_NAME"],
+                FunctionName=context.function_name,
             )
 
+        getLogger().warning(f"Restarting {context.function_name}")
         _restart_lambda_function()
 
 
@@ -577,6 +576,9 @@ async def get_project_detail(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     project_detail: PyPIProjectDetail = None
     if local:
+        getLogger().debug(
+            f'Getting local project detail for "{project}", user "{user.username}", content type "{content_type}"'
+        )
         params = dict(Bucket=BUCKET, Key=f"{PROJECTS_PREFIX}{project}/{V1_JSON_KEY}")
         print(params)
         try:
@@ -588,6 +590,9 @@ async def get_project_detail(
                 raise ce
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) from ce
     else:
+        getLogger().debug(
+            f'Getting remote project detail for "{project}", user "{user.username}", content type "{content_type}"'
+        )
         project_detail = PyPIProjectDetail.get_remote_project_detail(project)
         for file in project_detail.files:
             file.url = f"/simple/{project}/{file.filename}"
@@ -614,6 +619,9 @@ async def get_project_file(
     if (local := DATABASE.get(project)) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if local:
+        getLogger().debug(
+            f'Getting local project file "{filename}" for "{project}", user "{user.username}"'
+        )
         params = dict(Bucket=BUCKET, Key=f"{PROJECTS_PREFIX}{project}/{filename}")
         try:
             s3_client().head_object(**params)
@@ -629,6 +637,9 @@ async def get_project_file(
             )
         )
     else:
+        getLogger().debug(
+            f'Getting remote project file "{filename}" for "{project}", user "{user.username}"'
+        )
         params = dict(Bucket=BUCKET, Key=f"{REPO_PREFIX}cache/{project}/{filename}")
         try:
             s3_client().head_object(**params)
@@ -643,6 +654,7 @@ async def get_project_file(
                     break
             if not found:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+            getLogger().info(f"Pulling through {filename} from {project} at {file.url}")
             try:
                 response = requests.get(file.url)
                 response.raise_for_status()
@@ -670,6 +682,9 @@ async def get_project_list(
     content_type: str = Depends(content_type_negotiation),
     user: AuthorizedUser = Depends(authorize_user),
 ) -> RedirectResponse:
+    getLogger().debug(
+        f'Getting project list, user "{user.username}", content type "{content_type}"'
+    )
     key = PYPI_LEGACY_HTML_INDEX_KEY
     if content_type == "application/vnd.pypi.simple.v1+json":
         key = PYPI_SIMPLE_V1_JSON_INDEX_KEY
@@ -705,6 +720,7 @@ async def upload_project_file(
     form = await request.form()
     project = normalize_name(form["name"])
     project_file: UploadFile = form["content"]
+    getLogger().info(f'Uploading {project_file.filename} to {form["name"]}')
     project_prefix = f"{PROJECTS_PREFIX}{project}/"
     project_file_params = dict(
         Bucket=BUCKET, Key=f"{project_prefix}{project_file.filename}"
@@ -797,6 +813,9 @@ async def upload_project_file(
 def put_user(
     username: str, password: str, context: LambdaContext, upload: bool = False
 ) -> None:
+    getLogger().info(
+        f'Adding/updating user {username}{" with upload priveleges" if upload else ""}'
+    )
     hased_username = sha256(username.encode()).hexdigest()
     s3_client().put_object(
         Body=PyPIUser.parse_obj(dict(password=password, upload=upload)).json(),
@@ -804,10 +823,14 @@ def put_user(
         ContentType="application/json",
         Key=f"{USERS_PREFIX}{hased_username}.json",
     )
+    getLogger().info(
+        f"Added/updated user {username}, restarting {context.function_name}"
+    )
     restart_lambda_function(context)
 
 
 def remove_user(username: str, context: LambdaContext) -> None:
+    getLogger().info(f"Removing user {username}")
     hashed_username = sha256(username.encode()).hexdigest()
     try:
         s3_client().delete_object(
@@ -817,20 +840,18 @@ def remove_user(username: str, context: LambdaContext) -> None:
         if not aws_error_matches(ce, "NoSuchKey"):
             raise ce
     else:
+        getLogger().info(f"Removed user {username}, restarting {context.function_name}")
         restart_lambda_function(context)
 
 
 ##############################
 ##           MAIN           ##
 ##############################
+load_database()
 
 
 def handler(event: LambdaEvent, context: LambdaContext) -> Any:
-
     getLogger().debug("Processing event {}".format(json.dumps(event)))
-
-    load_database(context)
-
     if (
         APIGateway.infer(event, context, MANGUM.config)
         or ALB.infer(event, context, MANGUM.config)
@@ -849,11 +870,6 @@ def handler(event: LambdaEvent, context: LambdaContext) -> Any:
     elif username := event.get("removeUser"):
         return remove_user(username, context)
     elif "reheat":
-        pass
+        getLogger().info("Reheating")
     else:
         return create_index(context)
-
-
-# FOR UVICORN RUNS
-if "AWS_LAMBDA_FUNCTION_NAME" not in environ:
-    load_database(None)
