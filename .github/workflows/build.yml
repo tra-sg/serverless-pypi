@@ -26,11 +26,11 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.AWS_RUNNERS_ACCESS_TOKEN }}
-          ec2-image-id: ami-04200beedbd40d51d
-          ec2-instance-type: t3.large
-          subnet-id: subnet-27bad17d
-          security-group-id: sg-09f764c44f6765ee8
-          iam-role-name: github-runner
+          ec2-image-id: ${{ secrets.AWS_RUNNER_EC2_IMAGE_ID }}
+          ec2-instance-type: ${{ secrets.AWS_RUNNER_EC2_INSTANCE_TYPE }}
+          subnet-id: ${{ secrets.AWS_RUNNER_SUBNET_ID }}
+          security-group-id: ${{ secrets.AWS_RUNNER_SECURITY_GROUP_ID }}
+          iam-role-name: $ {{ secrets. AWS_RUNNER_IAM_ROLE_NAME }}
           aws-resource-tags: >
             [
               {"Key": "Name", "Value": "github-python-runner"},
