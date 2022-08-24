@@ -71,7 +71,7 @@ Uploads are `POST`ed to the root path of the repository.
 
 For example, uploading the `foobar` wheel using `twine` would look like:
 ```sh
-twine upload --repository-url "https://{my_lambda_function_url}/" --username {my_user} --password {my_password} foobar-0.0.1-py3-non-any-whl
+twine upload --repository-url "https://{my_lambda_function_url}/" --username {my_user} --password {my_password} foobar-0.0.1-py3-non-any.whl
 ```
 
 
