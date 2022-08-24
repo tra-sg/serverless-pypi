@@ -1,0 +1,13 @@
+aws-error-utils
+backoff
+beautifulsoup4
+black
+boto3
+boto3-stubs[lambda,s3]
+fastapi
+mangum
+passlib
+pydantic
+python-multipart
+requests
+uvicorn
