@@ -412,9 +412,7 @@ def create_index(context: LambdaContext = None) -> None:
             [
                 executor.submit(
                     s3_client().put_object,
-                    Body=project_list.json(
-                        by_alias=True, separators=(",", ":")
-                    ).encode(),
+                    Body=project_list.json(by_alias=True).encode(),
                     Bucket=BUCKET,
                     ContentType="application/vnd.pypi.simple.v1+json",
                     Key=PYPI_SIMPLE_V1_JSON_INDEX_KEY,
