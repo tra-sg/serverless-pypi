@@ -105,9 +105,9 @@ PACKAGE_METADATA = dict(
     supported_platform="Supported-Platform",
     version="Version",
 )
-REMOTE_INDEX_URL = environ.get("REMOTE_INDEX_URL") or "https://pypi.org/simple/"
-if not REMOTE_INDEX_URL.endswith("/"):
-    REMOTE_INDEX_URL += "/"
+MIRROR_INDEX_URL = environ.get("MIRROR_INDEX_URL") or "https://pypi.org/simple/"
+if not MIRROR_INDEX_URL.endswith("/"):
+    MIRROR_INDEX_URL += "/"
 REPO_PREFIX = environ.get("REPO_BASE_PREFIX") or ""
 if REPO_PREFIX and not REPO_PREFIX.endswith("/"):
     REPO_PREFIX += "/"
@@ -270,7 +270,7 @@ class PyPIProjectDetail(BaseModel):
                 project,
                 requests.get(
                     headers=dict(Accept=ACCEPT_HEADER),
-                    url=f"{REMOTE_INDEX_URL}{project}/",
+                    url=f"{MIRROR_INDEX_URL}{project}/",
                 ),
             )
         except requests.HTTPError as he:
@@ -371,11 +371,11 @@ USERS_DATABASE: dict[str, PyPIUser] = dict()
 
 def create_index(context: LambdaContext) -> None:
     getLogger().info("Indexing")
-    getLogger().info(f"Retrieving remote index from {REMOTE_INDEX_URL}")
+    getLogger().info(f"Retrieving remote index from {MIRROR_INDEX_URL}")
     project_list = PyPIProjectList.parse_response(
         requests.get(
             headers=dict(Accept=ACCEPT_HEADER),
-            url=REMOTE_INDEX_URL,
+            url=MIRROR_INDEX_URL,
         )
     )
     getLogger().info("Adding package repositories to the index")
