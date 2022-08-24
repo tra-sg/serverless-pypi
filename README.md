@@ -18,7 +18,9 @@ Python packaging is fantastic; however, challenges arise when you need to use st
 Uploads using `twine` are still quite fast, but since these must be processed directly by the Lambda function will be slower than downloads. New packages uploaded will be made availabe within a few seconds. New files uploaded to an existing package are available immediately.
 
 ## Installation
-`serverless-pypi` can be obtained from the `lambdalambdalambda` repo as a fully built Lamba package or can be cloned and built via `python setup.py ldist`.
+`serverless-pypi` can be obtained from the `lambdalambdalambda` repo as a fully built Lamba package (https://lambdalambdalambda-repo-<region>.s3.<region>.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-<version>.zip) or can be cloned and built via `python setup.py ldist`. Currently `lambdalambdalambda` supports the `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2` and `eu-west-1`. For `us-east-1` simply use no region (e.g. - https://lambdalambdalambda-repo.s3.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-0.0.1.zip)
+
+> Note - all `lambdalambdalambda` buckets are publicly available.
 
 ### AWS Deployment
 `serverless-pypi` may be deployed in AWS in the following ways:

@@ -855,7 +855,7 @@ load_database()
 
 
 def handler(event: LambdaEvent, context: LambdaContext) -> Any:
-    getLogger().debug(
+    getLogger().info(
         "Processing event:\n{}".format(
             orjson.dumps(event, option=orjson.OPT_INDENT_2).decode()
         )
