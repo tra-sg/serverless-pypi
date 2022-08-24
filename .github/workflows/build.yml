@@ -31,7 +31,7 @@ jobs:
           subnet-id: subnet-60eef25c
           security-group-id: sg-09f764c44f6765ee8
           iam-role-name: github-runner
-          aws-resource-tags:
+          aws-resource-tags: >
             [
               {"Key": "Name", "Value": "github-python-runner"},
               {"Key": "GitHubRepository", "Value": "${{ github.repository }}"}
