@@ -127,6 +127,7 @@ S3_CLIENT: S3Client = None
 
 def orjson_dumps(obj: Any, *, default: Callable[[Any], Any], **kwargs) -> str:
     # orjson.dumps returns bytes, to match standard json.dumps we need to decode
+    getLogger().info(f"KWARGS:{kwargs}")
     return orjson.dumps(obj, default=default, **kwargs).decode()
 
 
