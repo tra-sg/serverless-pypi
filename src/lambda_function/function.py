@@ -58,7 +58,7 @@ ACCEPT_HEADER = ", ".join(
         "text/html;q=0.01",  # For legacy compatibility
     ]
 )
-API_GATEWAY_BASE_PATH = environ.get("API_GATEWAY_BASE_PATH") or "/"
+API_GATEWAY_BASE_PATH = environ.get("API_GATEWAY_BASE_PATH")
 APP = FastAPI()
 BUCKET = environ["BUCKET"]
 DATABASE: dict[str, bool] = None
