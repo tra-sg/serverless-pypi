@@ -49,7 +49,7 @@ If you are deploying `serverless-pypi` stand-alone, you will need to provision a
 | s3:GetObject | {BUCKET}/{REPO_BASE_PREFIX}/* | Retrieval of stored indexes, packages and users |
 | s3:PutObject | {BUCKET}/{REPO_BASE_PREFIX}/* | Storage of indexes, packages and users |
 | s3:ListBucket | {BUCKET}/{REPO_BASE_PREFIX}/* | Listing of stored private packages and users |
-| lambda:Invoke | itself | Allows automated reindexing when a new package is uploaded |
+| lambda:InvokeFunction | itself | Allows automated reindexing when a new package is uploaded |
 | lambda:UpdateFunctionConfiguration | itself | Allows for forced restart of the function when reindexing and putting/removing users |
 
 > Note - additional permissions will be required based upon you deployment method.
