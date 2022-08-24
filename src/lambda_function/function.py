@@ -806,7 +806,7 @@ async def upload_project_file(
         lambda_client().invoke(
             FunctionName=environ["AWS_LAMBDA_FUNCTION_NAME"],
             InvocationType="Event",
-            Payload="reindex",
+            Payload=orjson.dumps("reindex"),
         )
 
 
