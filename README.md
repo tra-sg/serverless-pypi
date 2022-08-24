@@ -7,9 +7,9 @@ Python packaging is fantastic; however, challenges arise when you need to use st
 `serverless-pypi` is designed to largely elimiate these challenges. It is an AWS Lambda function that secures your private packages while fully mirroring *any* underlying repository, and it does all of this with **only the Lambda function itself and an S3 bucket**.
 
 `serverless-pypi`:
-1. Implements the PyPI JSON and HTML protocols
+1. Implements the PyPI simple JSON and HTML protocols and PyPI's upload protocol
 2. Pull-through mirrors a base repository (https://pypi.org/simple by default; this may be another private repository if you wish)
-3. Allows for localized upload of private packages
+3. Allows for localized upload of private packages; private packages with the same name as mirrored packages will override the mirror.
 4. Manages users for both download and upload roles
 
 ## Performance
@@ -53,6 +53,27 @@ If you are deploying `serverless-pypi` stand-alone, you will need to provision a
 | lambda:UpdateFunctionConfiguration | itself | Allows for forced restart of the function when reindexing and putting/removing users |
 
 > Note - additional permissions will be required based upon you deployment method.
+
+## Using `serverless-pypi`
+
+### `pip install` or equivalent
+The repository base URI is `/simple/`. Depending on your deployment method you will need to add this to the base URL of the deployment (e.g. - for stand-alone deployment, this will be the Lambda Function URL).
+
+For example, to `pip install simplejson` you would:
+```sh
+pip install --index-url https://{my_user}:{my_password}@{my_lambda_function_url}/simple simplejson
+```
+
+## Uploading private packages using twine
+`serverless-pypi` will automatically create a new project for the first package file uploaded for the project. This has been fully tested with `twine`; if you use a different upload method modify accordingly.
+
+Uploads are `POST`ed to the root path of the repository.
+
+For example, uploading the `foobar` wheel using `twine` would look like:
+```sh
+twine upload --repository-url "https://{my_lambda_function_url}/" --username {my_user} --password {my_password} foobar-0.0.1-py3-non-any-whl
+```
+
 
 ## Managing `serverless-pypi`
 
