@@ -42,5 +42,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Hello World
-        run: pip3.9 --version
-        run: python3.9 --version
+        run: |
+          pip3.9 --version
+          python3.9 --version
