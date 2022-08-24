@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import html as _html
-import json
 import re
 from concurrent.futures import ThreadPoolExecutor, wait
 from datetime import datetime, timezone
 from hashlib import sha256
 from logging import INFO, getLogger
 from os import environ
-from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple, Optional, Union, cast
 
 import backoff
 import boto3
+import orjson
 import requests
 from aws_error_utils import aws_error_matches
 from botocore.config import Config as BotocoreConfig
@@ -29,8 +29,8 @@ from fastapi import (
 )
 from fastapi.responses import (
     RedirectResponse,
-    JSONResponse,
     HTMLResponse,
+    ORJSONResponse,
     PlainTextResponse,
 )
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -125,7 +125,12 @@ S3_CLIENT: S3Client = None
 ##############################
 
 
-class PyPIMeta(BaseModel):
+def orjson_dumps(obj: Any, *, default: Callable[[Any], Any], **kwargs) -> str:
+    # orjson.dumps returns bytes, to match standard json.dumps we need to decode
+    return orjson.dumps(obj, default=default, **kwargs).decode()
+
+
+class PyPIMeta(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads):
     api_version: str = Field(alias="api-version")
 
     @validator("api_version")
@@ -138,7 +143,9 @@ class PyPIMeta(BaseModel):
         return f'<meta name="pypi:repository-version" content="{self.api_version}"/>'
 
 
-class PyPIProjectListProject(BaseModel):
+class PyPIProjectListProject(
+    BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads
+):
     name: str
 
     def __eq__(self, other: Any) -> bool:
@@ -159,7 +166,7 @@ class PyPIProjectListProject(BaseModel):
         return normalize_name(self.name)
 
 
-class PyPIProjectList(BaseModel):
+class PyPIProjectList(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads):
     meta: PyPIMeta
     projects: list[PyPIProjectListProject]
 
@@ -195,7 +202,7 @@ class PyPIProjectList(BaseModel):
         return project_list
 
 
-class PyPIProjectFile(BaseModel):
+class PyPIProjectFile(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads):
     dist_info_metadata: Optional[Union[bool, dict[str, str]]] = Field(
         alias="dist-info-metadata"
     )
@@ -241,24 +248,22 @@ class PyPIProjectFile(BaseModel):
         return html + f">{self.filename}</a><br />"
 
     @property
-    def metadata(self) -> dict[str, str]:
-        metadata = dict(
-            hashes=json.dumps(self.hashes, separators=(",", ":")), url=self.url
-        )
+    def s3_metadata(self) -> dict[str, str]:
+        metadata = dict(hashes=orjson.dumps(self.hashes).decode(), url=self.url)
         if self.dist_info_metadata is not None:
-            metadata["dist-info-metadata"] = json.dumps(
-                self.dist_info_metadata, separators=(",", ":")
-            )
+            metadata["dist-info-metadata"] = orjson.dumps(
+                self.dist_info_metadata
+            ).decode()
         if self.gpg_sig is not None:
             metadata["gpg-sig"] = self.gpg_sig
         if self.requires_python is not None:
             metadata["requires-python"] = self.requires_python
         if self.yanked is not None:
-            metadata["yanked"] = json.dumps(self.yanked, separators=(",", ":"))
+            metadata["yanked"] = orjson.dumps(self.yanked).decode()
         return metadata
 
 
-class PyPIProjectDetail(BaseModel):
+class PyPIProjectDetail(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads):
     files: list[PyPIProjectFile] = list()
     meta: PyPIMeta
     name: str
@@ -337,7 +342,7 @@ class PyPIProjectDetail(BaseModel):
         )
 
 
-class PyPIUser(BaseModel):
+class PyPIUser(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.loads):
     hash: str
     upload: bool
 
@@ -429,7 +434,7 @@ def create_index(context: LambdaContext = None) -> None:
                 ),
                 executor.submit(
                     s3_client().put_object,
-                    Body=json.dumps(database, separators=(",", ":")).encode(),
+                    Body=orjson.dumps(database),
                     Bucket=BUCKET,
                     ContentType="application/json",
                     Key=DATABASE_KEY,
@@ -450,7 +455,7 @@ def lambda_client() -> LambdaClient:
 def load_database(reentry: bool = False) -> None:
     global DATABASE
     try:
-        DATABASE = json.load(
+        DATABASE = orjson.loads(
             boto3.resource(
                 "s3",
                 config=BotocoreConfig(signature_version="s3v4"),
@@ -458,6 +463,7 @@ def load_database(reentry: bool = False) -> None:
             )
             .Object(BUCKET, DATABASE_KEY)
             .get()["Body"]
+            .read()
         )
     except ClientError as ce:
         if not aws_error_matches(ce, "NoSuchKey") or reentry:
@@ -598,7 +604,7 @@ async def get_project_detail(
             file.url = f"/simple/{project}/{file.filename}"
     response: Response = None
     if content_type == "application/vnd.pypi.simple.v1+json":
-        response = JSONResponse(
+        response = ORJSONResponse(
             content=project_detail.dict(by_alias=True, exclude_unset=True),
             media_type=content_type,
         )
@@ -661,7 +667,7 @@ async def get_project_file(
                 s3_client().put_object(
                     Body=response.content,
                     ContentType=response.headers["content-type"],
-                    Metadata=file.metadata,
+                    Metadata=file.s3_metadata,
                     **params,
                 )
             except requests.HTTPError as he:
@@ -851,7 +857,11 @@ load_database()
 
 
 def handler(event: LambdaEvent, context: LambdaContext) -> Any:
-    getLogger().debug("Processing event {}".format(json.dumps(event)))
+    getLogger().debug(
+        "Processing event:\n{}".format(
+            orjson.dumps(event, option=orjson.OPT_INDENT_2).decode()
+        )
+    )
     if (
         APIGateway.infer(event, context, MANGUM.config)
         or ALB.infer(event, context, MANGUM.config)

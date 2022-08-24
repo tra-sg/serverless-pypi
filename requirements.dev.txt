@@ -6,6 +6,7 @@ boto3
 boto3-stubs[lambda,s3]
 fastapi
 mangum
+orjson
 passlib
 pydantic
 python-multipart

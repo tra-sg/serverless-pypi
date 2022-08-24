@@ -47,6 +47,7 @@ lambda_install_requires = [
     "beautifulsoup4",
     "fastapi",
     "mangum",
+    "orjson",
     "passlib",
     "pydantic",
     "python-multipart",
