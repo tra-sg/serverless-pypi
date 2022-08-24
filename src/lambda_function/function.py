@@ -127,7 +127,6 @@ S3_CLIENT: S3Client = None
 
 def orjson_dumps(obj: Any, *, default: Callable[[Any], Any], **kwargs) -> str:
     # orjson.dumps returns bytes, to match standard json.dumps we need to decode
-    getLogger().info(f"KWARGS:{kwargs}")
     return orjson.dumps(obj, default=default, **kwargs).decode()
 
 
@@ -878,7 +877,7 @@ def handler(event: LambdaEvent, context: LambdaContext) -> Any:
         )
     elif "removeUser" in event:
         return remove_user(event["removeUser"], context)
-    elif "reheat" in event:
-        getLogger().info("Reheating")
-    else:
+    elif "reindex" in event:
         return create_index(context)
+    else:
+        getLogger().info("Reheating")

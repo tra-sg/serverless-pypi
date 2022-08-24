@@ -91,15 +91,15 @@ Managing users requries directly invoking the deployed Lambda function; invocati
 | Put user | Adds/updates a user | ```{"putUser": {"username": "my_user", "password": "my_password", "upload": [true/false]}}``` |
 | Remove user | Removes a user | ```{"removeUser": "my_user"}```
 
-### Keeping the Lambda function warm
-Startup of the Lambda function is somewhat expensive since the total index (~8MB) is loaded and parsed into memory; therefore, you may desire to keep the Lambda function "warm" to make sure that it responds promptly to your `pip` and `twine` requests.
-
-To do this, simply invoke the deployed Lambda function with the payload `"reheat"`.
-
 ### Reindexing
 Since the underlying mirrored PyPI repository will change periodically, it is necessary to reindex your `serverless-pypi` repository periodically.
 
-This is accomplished via any invocation (e.g. - an AWS EventBus Scheduled Event) that does not come from ALB, AWS Gateway, the Lambda's Function URL or Lambda@Edge, or does not match the user management or reheating invocation payloads. When an unknown payload is received, `serverless-pypi` will pull the mirror's master index, reindex your instance and restart your deployed Lambda function.
+To do this, simply invoke the deployed Lambda function with the payload `"reindex"`. When this payload is received, `serverless-pypi` will pull the mirror's master index, reindex your instance and restart your deployed Lambda function.
+
+### Keeping the Lambda function warm
+Startup of the Lambda function is somewhat expensive since the total index (~8MB) is loaded and parsed into memory; therefore, you may desire to keep the Lambda function "warm" to make sure that it responds promptly to your `pip` and `twine` requests.
+
+This is accomplished via any invocation (e.g. - an AWS EventBus Scheduled Event) that does not come from ALB, AWS Gateway, the Lambda's Function URL or Lambda@Edge, or does not match the user management or reindexing invocation payloads.
 
 ## Limitations
 Uploads from `twine` to your `serverless-pypi` repository are limited to package files of 6MB or less.
