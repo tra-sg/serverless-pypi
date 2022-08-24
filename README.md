@@ -64,7 +64,7 @@ For example, to `pip install simplejson` you would:
 pip install --index-url https://{my_user}:{my_password}@{my_lambda_function_url}/simple simplejson
 ```
 
-## Uploading private packages using twine
+## Uploading private packages using `twine` or equivalent
 `serverless-pypi` will automatically create a new project for the first package file uploaded for the project. This has been fully tested with `twine`; if you use a different upload method modify accordingly.
 
 Uploads are `POST`ed to the root path of the repository.
