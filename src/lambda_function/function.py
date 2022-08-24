@@ -59,7 +59,11 @@ ACCEPT_HEADER = ", ".join(
     ]
 )
 API_GATEWAY_BASE_PATH = environ.get("API_GATEWAY_BASE_PATH")
-APP = FastAPI()
+APP = FastAPI(
+    docs_url=None,
+    openapi_url=None,
+    redoc_url=None,
+)
 BUCKET = environ["BUCKET"]
 DATABASE: dict[str, bool] = None
 DIST_EXTENSIONS = {
