@@ -30,7 +30,7 @@ jobs:
           ec2-instance-type: ${{ secrets.AWS_RUNNER_EC2_INSTANCE_TYPE }}
           subnet-id: ${{ secrets.AWS_RUNNER_SUBNET_ID }}
           security-group-id: ${{ secrets.AWS_RUNNER_SECURITY_GROUP_ID }}
-          iam-role-name: $ {{ secrets. AWS_RUNNER_IAM_ROLE_NAME }}
+          iam-role-name: $ {{ secrets.AWS_RUNNER_IAM_ROLE_NAME }}
           aws-resource-tags: >
             [
               {"Key": "Name", "Value": "github-python-runner"},
