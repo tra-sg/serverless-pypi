@@ -45,7 +45,7 @@ jobs:
         run: pip3.9 install lambda-setuptools
       - name: Upload
         run: |
-          lupload --access-key=${{ secrets.LAMBDALAMBDALAMBDA_ACCESS_KEY_ID }} --secret-access-key=${{ secrets.LAMBDALAMBDALAMBDA_SECRET_ACCESS_KEY }} --s3-bucket=${{ secrets.LAMBDALAMBDALAMBDA_BUCKET }} --s3-prefix=quinovas/serverless-pypi/
+          python3.9 setup.py lupload --access-key=${{ secrets.LAMBDALAMBDALAMBDA_ACCESS_KEY_ID }} --secret-access-key=${{ secrets.LAMBDALAMBDALAMBDA_SECRET_ACCESS_KEY }} --s3-bucket=${{ secrets.LAMBDALAMBDALAMBDA_BUCKET }} --s3-prefix=quinovas/serverless-pypi/
         if: ${{ success() }}
   stop-runner:
     name: Stop self-hosted EC2 runner
