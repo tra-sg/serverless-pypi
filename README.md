@@ -97,7 +97,7 @@ Startup of the Lambda function is somewhat expensive since the total index (~8MB
 To do this, simply invoke the deployed Lambda function with the payload `"reheat"`.
 
 ### Reindexing
-Since the underlying mirrored PyPI repository will change periodically, it is necessary to reindex you `serverless-pypi` repository periodically.
+Since the underlying mirrored PyPI repository will change periodically, it is necessary to reindex your `serverless-pypi` repository periodically.
 
 This is accomplished via any invocation (e.g. - an AWS EventBus Scheduled Event) that does not come from ALB, AWS Gateway, the Lambda's Function URL or Lambda@Edge, or does not match the user management or reheating invocation payloads. When an unknown payload is received, `serverless-pypi` will pull the mirror's master index, reindex your instance and restart your deployed Lambda function.
 
