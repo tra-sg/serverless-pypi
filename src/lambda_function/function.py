@@ -566,6 +566,7 @@ async def content_type_negotiation(accept: Optional[str] = Header(default="text/
 
 
 @APP.get("/simple/{project}/")
+@APP.get("/simple/{project}")
 async def get_project_detail(
     project: str,
     content_type: str = Depends(content_type_negotiation),
@@ -682,6 +683,7 @@ async def get_project_file(
 
 
 @APP.get("/simple/")
+@APP.get("/simple")
 async def get_project_list(
     content_type: str = Depends(content_type_negotiation),
     user: AuthorizedUser = Depends(authorize_user),
@@ -701,18 +703,6 @@ async def get_project_list(
             Params=dict(Bucket=BUCKET, Key=key),
         )
     )
-
-
-@APP.get("/simple/{project}")
-async def redirect_project_detail(project: str) -> RedirectResponse:
-    return RedirectResponse(
-        f"/simple/{project}/", status_code=status.HTTP_308_PERMANENT_REDIRECT
-    )
-
-
-@APP.get("/simple")
-async def redirect_project_list() -> RedirectResponse:
-    return RedirectResponse("/simple/", status_code=status.HTTP_308_PERMANENT_REDIRECT)
 
 
 @APP.post("/", status_code=status.HTTP_201_CREATED)
