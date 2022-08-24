@@ -868,17 +868,17 @@ def handler(event: LambdaEvent, context: LambdaContext) -> Any:
         or LambdaAtEdge.infer(event, context, MANGUM.config)
     ):
         return MANGUM(event, context)
-    elif username := event.get("putUser"):
-        username = cast(dict, username)
+    elif "putUser" in event:
+        username = cast(dict, event["putUser"])
         return put_user(
             username["username"],
             username["password"],
             context,
             username.get("upload", False),
         )
-    elif username := event.get("removeUser"):
-        return remove_user(username, context)
-    elif "reheat":
+    elif "removeUser" in event:
+        return remove_user(event["removeUser"], context)
+    elif "reheat" in event:
         getLogger().info("Reheating")
     else:
         return create_index(context)
