@@ -28,7 +28,7 @@ jobs:
           github-token: ${{ secrets.AWS_RUNNERS_ACCESS_TOKEN }}
           ec2-image-id: ami-04200beedbd40d51d
           ec2-instance-type: t3.large
-          subnet-id: subnet-60eef25c
+          subnet-id: subnet-27bad17d
           security-group-id: sg-09f764c44f6765ee8
           iam-role-name: github-runner
           aws-resource-tags: >
