@@ -2,9 +2,8 @@ name: Artifacts Upload
 
 on:
   push:
-    branches:
-      - 'v[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    tags:
+      - '*'
   workflow_dispatch:
 jobs:
   start-runner:
