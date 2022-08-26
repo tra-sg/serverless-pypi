@@ -19,7 +19,7 @@ Uploads using `twine` are still quite fast, but since these must be processed di
 
 ## Installation
 `serverless-pypi` can be obtained from:
-1. the `lambdalambdalambda` repo as a fully built Lamba package (https://lambdalambdalambda-repo-<region>.s3.<region>.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-<version>.zip). Currently `lambdalambdalambda` supports the `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2` and `eu-west-1`. For `us-east-1` simply use no region (e.g. - https://lambdalambdalambda-repo.s3.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-0.0.5.zip).
+1. the `lambdalambdalambda` repo as a fully built Lamba package (https://lambdalambdalambda-repo-<region>.s3.<region>.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-<version>.zip). Currently `lambdalambdalambda` supports the `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2` and `eu-west-1`. For `us-east-1` simply use no region (e.g. - https://lambdalambdalambda-repo.s3.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-0.0.6.zip).
 2. cloning and building via `python setup.py ldist` (note the build *must* be done on an `Amazon Linux 2` host).
 3. installing into a folder using `pip install --target build_dir serverless-pypi`, and then zipping `build_dir` into a lambda package (note the build *must* be done on an `Amazon Linux 2` host).
 
@@ -45,7 +45,7 @@ If you are deploying `serverless-pypi` stand-alone, you will need to provision a
 | API_GATEWAY_BASE_PATH | N | Sets the base path for the Lambda function. Only applicable if this is fronted by an AWS API Gateway. | / |
 | BUCKET | Y | The AWS S3 bucket that is used to store the PyPI information. | |
 | LOGGING_LEVEL | N | Sets the logging level for the Lambda function | INFO |
-| MIRROR_INDEX_URL | N | The url underlying PyPI repository to mirror. This may contain credentialing information. | https://pypi.org/simple/ |
+| UPSTREAM_INDEX_URL | N | The url underlying PyPI repository to mirror. This may contain credentialing information. | https://pypi.org/simple/ |
 | REPO_BASE_PREFIX | N | The prefix to use in the S3 bucket. | "" |
 
 ### IAM Permissions

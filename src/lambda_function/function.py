@@ -109,9 +109,6 @@ PACKAGE_METADATA = dict(
     supported_platform="Supported-Platform",
     version="Version",
 )
-MIRROR_INDEX_URL = environ.get("MIRROR_INDEX_URL") or "https://pypi.org/simple/"
-if not MIRROR_INDEX_URL.endswith("/"):
-    MIRROR_INDEX_URL += "/"
 REPO_PREFIX = environ.get("REPO_BASE_PREFIX") or ""
 if REPO_PREFIX and not REPO_PREFIX.endswith("/"):
     REPO_PREFIX += "/"
@@ -121,8 +118,11 @@ PYPI_LEGACY_HTML_INDEX_KEY = f"{REPO_PREFIX}legacy.html"
 PYPI_SIMPLE_V1_HTML_INDEX_KEY = f"{REPO_PREFIX}index.html"
 PYPI_SIMPLE_V1_JSON_INDEX_KEY = f"{REPO_PREFIX}{V1_JSON_KEY}"
 PROJECTS_PREFIX = f"{REPO_PREFIX}projects/"
-USERS_PREFIX = f"{REPO_PREFIX}users/"
 S3_CLIENT: S3Client = None
+USERS_PREFIX = f"{REPO_PREFIX}users/"
+UPSTREAM_INDEX_URL = environ.get("UPSTREAM_INDEX_URL") or "https://pypi.org/simple/"
+if not UPSTREAM_INDEX_URL.endswith("/"):
+    UPSTREAM_INDEX_URL += "/"
 
 ##############################
 ##          MODELS          ##
@@ -279,7 +279,7 @@ class PyPIProjectDetail(BaseModel, json_dumps=orjson_dumps, json_loads=orjson.lo
                 project,
                 requests.get(
                     headers=dict(Accept=ACCEPT_HEADER),
-                    url=f"{MIRROR_INDEX_URL}{project}/",
+                    url=f"{UPSTREAM_INDEX_URL}{project}/",
                 ),
             )
         except requests.HTTPError as he:
@@ -380,11 +380,11 @@ USERS_DATABASE: dict[str, PyPIUser] = dict()
 
 def create_index(context: LambdaContext = None) -> None:
     getLogger().info("Indexing")
-    getLogger().info(f"Retrieving remote index from {MIRROR_INDEX_URL}")
+    getLogger().info(f"Retrieving upstream index from {UPSTREAM_INDEX_URL}")
     project_list = PyPIProjectList.parse_response(
         requests.get(
             headers=dict(Accept=ACCEPT_HEADER),
-            url=MIRROR_INDEX_URL,
+            url=UPSTREAM_INDEX_URL,
         )
     )
     getLogger().info("Adding package repositories to the index")
