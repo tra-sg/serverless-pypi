@@ -19,7 +19,7 @@ Uploads using `twine` are still quite fast, but since these must be processed di
 
 ## Installation
 `serverless-pypi` can be obtained from:
-1. the `lambdalambdalambda` repo as a fully built Lamba package (https://lambdalambdalambda-repo-<region>.s3.<region>.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-<version>.zip). Currently `lambdalambdalambda` supports the `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2` and `eu-west-1`. For `us-east-1` simply use no region (e.g. - https://lambdalambdalambda-repo.s3.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-0.0.3.zip).
+1. the `lambdalambdalambda` repo as a fully built Lamba package (https://lambdalambdalambda-repo-<region>.s3.<region>.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-<version>.zip). Currently `lambdalambdalambda` supports the `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2` and `eu-west-1`. For `us-east-1` simply use no region (e.g. - https://lambdalambdalambda-repo.s3.amazonaws.com/quinovas/serverless-pypi/serverless-pypi-0.0.4.zip).
 2. cloning and building via `python setup.py ldist` (note the build *must* be done on an `Amazon Linux 2` host).
 3. installing into a folder using `pip install --target build_dir serverless-pypi`, and then zipping `build_dir` into a lambda package (note the build *must* be done on an `Amazon Linux 2` host).
 

@@ -15,7 +15,7 @@ lambda_name = "serverless-pypi"
 # Versions should comply with PEP440.  For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # https://packaging.python.org/en/latest/single_source_version.html
-lambda_version = "0.0.3"
+lambda_version = "0.0.4"
 
 lambda_description = "An AWS Lambda implementation for the PyPI protocols"
 
@@ -29,8 +29,7 @@ lambda_dev_status = "3 - Alpha"
 lambda_keywords = "lambda"
 
 # What is your project's license
-# TODO: Change your project's license
-lambda_license = "APL2"
+lambda_license = "Apache 2.0"
 
 # Who is the author?
 # TODO: Update the author
