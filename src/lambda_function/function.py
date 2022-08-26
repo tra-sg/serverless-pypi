@@ -444,7 +444,7 @@ def create_index(context: LambdaContext = None) -> None:
             ]
         )
     getLogger().info("Index created")
-    restart_lambda_function(context)
+    restart_lambda_function(context, "Reindexed")
 
 
 def lambda_client() -> LambdaClient:
@@ -478,7 +478,7 @@ def normalize_name(name: str) -> str:
     return NORMALIZE_NAME_RE.sub("-", name).lower()
 
 
-def restart_lambda_function(context: LambdaContext) -> None:
+def restart_lambda_function(context: LambdaContext, description: str) -> None:
     if context:
 
         @backoff.on_exception(
@@ -491,7 +491,7 @@ def restart_lambda_function(context: LambdaContext) -> None:
         )
         def _restart_lambda_function() -> None:
             lambda_client().update_function_configuration(
-                Description=f"Reindexed - {datetime.now(timezone.utc).isoformat()}",
+                Description=f"{description} - {datetime.now(timezone.utc).isoformat()}",
                 FunctionName=context.function_name,
             )
 
@@ -824,7 +824,7 @@ def put_user(
     getLogger().info(
         f"Added/updated user {username}, restarting {context.function_name}"
     )
-    restart_lambda_function(context)
+    restart_lambda_function(context, "User added")
 
 
 def remove_user(username: str, context: LambdaContext) -> None:
@@ -839,7 +839,7 @@ def remove_user(username: str, context: LambdaContext) -> None:
             raise ce
     else:
         getLogger().info(f"Removed user {username}, restarting {context.function_name}")
-        restart_lambda_function(context)
+        restart_lambda_function(context, "User removed")
 
 
 ##############################
