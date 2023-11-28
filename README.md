@@ -47,6 +47,7 @@ If you are deploying `serverless-pypi` stand-alone, you will need to provision a
 | LOGGING_LEVEL | N | Sets the logging level for the Lambda function | INFO |
 | UPSTREAM_INDEX_URL | N | The url underlying PyPI repository to mirror. This may contain credentialing information. | https://pypi.org/simple/ |
 | REPO_BASE_PREFIX | N | The prefix to use in the S3 bucket. | "" |
+| HASH_DIST_INFO_METADATA | N | Whether to hash the `dist-info-metadata`. Defaults to `"0"` since it seems like having the hash may cause `LinkHash: "unhashable type 'dict'"` error on pip>=22.3 and above. | "0" |
 
 ### IAM Permissions
 | Permission | Resource | Note |

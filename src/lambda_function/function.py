@@ -74,6 +74,7 @@ DIST_EXTENSIONS = {
     ".whl": "application/octet-stream",
     ".zip": "application/zip",
 }
+HASH_DIST_INFO_METADATA = environ.get("HASH_DIST_INFO_METADATA", "0")
 HTTP_BASIC = HTTPBasic()
 LAMBDA_CLIENT: LambdaClient = None
 LATEST_RE = re.compile(r"latest")
@@ -767,8 +768,14 @@ async def upload_project_file(
         ContentType="text/plain",
         Key=project_file_params["Key"] + ".metadata",
     )
+
+    if HASH_DIST_INFO_METADATA == "1":
+        dist_info_metadata = dict(sha256=sha256(metadata).hexdigest())
+    else:
+        dist_info_metadata = "true"
+
     project_file_obj = {
-        "dist-info-metadata": dict(sha256=sha256(metadata).hexdigest()),
+        "dist-info-metadata": dist_info_metadata,
         "filename": project_file.filename,
         "hashes": {
             cast(str, key).split("_")[0]: value
