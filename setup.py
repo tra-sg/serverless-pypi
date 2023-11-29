@@ -44,11 +44,11 @@ lambda_install_requires = [
     "aws-error-utils",
     "backoff",
     "beautifulsoup4",
-    "fastapi",
+    "fastapi<0.100.0",
     "mangum",
     "orjson",
     "passlib",
-    "pydantic",
+    "pydantic<2.0.0",
     "python-multipart",
     "requests",
 ]
