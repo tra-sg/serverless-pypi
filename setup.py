@@ -15,7 +15,7 @@ lambda_name = "serverless-pypi"
 # Versions should comply with PEP440.  For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # https://packaging.python.org/en/latest/single_source_version.html
-lambda_version = "0.0.6"
+lambda_version = "0.0.7-tra.1"
 
 lambda_description = "An AWS Lambda implementation for the PyPI protocols"
 
@@ -44,11 +44,11 @@ lambda_install_requires = [
     "aws-error-utils",
     "backoff",
     "beautifulsoup4",
-    "fastapi",
+    "fastapi<0.100.0",
     "mangum",
     "orjson",
     "passlib",
-    "pydantic",
+    "pydantic<2.0.0",
     "python-multipart",
     "requests",
 ]

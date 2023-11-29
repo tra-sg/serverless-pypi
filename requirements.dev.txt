@@ -4,11 +4,11 @@ beautifulsoup4
 black
 boto3
 boto3-stubs[lambda,s3]
-fastapi
+fastapi<0.100.0
 mangum
 orjson
 passlib
-pydantic
+pydantic<2.0.0
 python-multipart
 requests
 uvicorn
