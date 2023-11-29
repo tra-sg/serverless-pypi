@@ -713,7 +713,7 @@ async def get_project_list(
 @APP.post("/", status_code=status.HTTP_201_CREATED)
 async def upload_project_file(
     request: Request, user: AuthorizedUser = Depends(authorize_user)
-) -> Optional[Response]:
+):
     if not user.upload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     form = await request.form()
